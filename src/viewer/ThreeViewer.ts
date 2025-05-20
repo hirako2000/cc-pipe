@@ -298,7 +298,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
     get container(): HTMLElement {
         // todo console.warn('container is deprecated, NOTE: subscribe to events when the canvas is moved to another container')
         if (this._canvas.parentElement !== this._container) {
-            this.console.error('ThreeViewer: Canvas is not in the container, this might cause issues with some plugins.')
+            console.error('ThreeViewer: Canvas is not in the container, this might cause issues with some plugins.')
         }
         return this._container
     }
@@ -444,7 +444,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         // render manager
 
         if (options.isAntialiased !== undefined || options.useRgbm !== undefined || options.useGBufferDepth !== undefined) {
-            this.console.warn('isAntialiased, useRgbm and useGBufferDepth are deprecated, use msaa, rgbm and zPrepass instead.')
+            console.warn('isAntialiased, useRgbm and useGBufferDepth are deprecated, use msaa, rgbm and zPrepass instead.')
         }
         this.renderManager = new ViewerRenderManager({
             canvas: this._canvas,
@@ -485,7 +485,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         }
         for (const p of options.plugins ?? []) this.addPluginSync(p)
 
-        this.console.log('ThreePipe Viewer instance initialized, version: ', ThreeViewer.VERSION)
+        console.log('ThreePipe Viewer instance initialized, version: ', ThreeViewer.VERSION)
 
         if (options.load) {
             const sources = [options.load.src].flat().filter(s=> s)
@@ -648,7 +648,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
     protected _animationLoop(event: IAnimationLoopEvent): void {
         if (!this.enabled || !this.renderEnabled) return
         if (this._isRenderingFrame) {
-            this.console.warn('animation loop: frame skip') // not possible actually, since this is not async
+            console.warn('animation loop: frame skip') // not possible actually, since this is not async
             return
         }
         this._isRenderingFrame = true
@@ -668,11 +668,11 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
                     const cam = this.renderManager.webglRenderer.xr.getCamera()?.cameras[0]?.viewport
                     if (cam) {
                         if (cam.x !== 0 || cam.y !== 0) {
-                            this.console.warn('x and y must be 0?')
+                            console.warn('x and y must be 0?')
                         }
                         size[0] = cam.width
                         size[1] = cam.height
-                        this.console.log('resize for xr', size)
+                        console.log('resize for xr', size)
                     } else {
                         this._needsResize = false
                     }
@@ -707,9 +707,9 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
                         this._scene.renderCamera = cam
                         if (cam.visible) this.renderManager.render(this._scene, this.renderManager.defaultRenderToScreen)
                     } catch (e) {
-                        this.console.error('ThreeViewer: Error while rendering frame. Enable debug mode to check the errors.')
+                        console.error('ThreeViewer: Error while rendering frame. Enable debug mode to check the errors.')
                         if (this.debug) {
-                            this.console.error(e)
+                            console.error(e)
                             throw e
                         }
                         // this.enabled = false
@@ -779,7 +779,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         }
         const type = p.constructor.PluginType
         if (!p.constructor.PluginType) {
-            this.console.error('ThreeViewer: PluginType is not defined for', p)
+            console.error('ThreeViewer: PluginType is not defined for', p)
             return p
         }
 
@@ -788,12 +788,12 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         }
 
         if (this.plugins[type]) {
-            this.console.error(`ThreeViewer: Plugin of type ${type} already exists, removing and disposing old plugin. This might break functionality, ensure only one plugin of a type is added`, this.plugins[type], p)
+            console.error(`ThreeViewer: Plugin of type ${type} already exists, removing and disposing old plugin. This might break functionality, ensure only one plugin of a type is added`, this.plugins[type], p)
             await this.removePlugin(this.plugins[type])
         }
         this.plugins[type] = p
         const oldType = p.constructor.OldPluginType
-        if (oldType && this.plugins[oldType]) this.console.error(`ThreeViewer: Plugin type mismatch ${oldType}`)
+        if (oldType && this.plugins[oldType]) console.error(`ThreeViewer: Plugin type mismatch ${oldType}`)
         if (oldType) this.plugins[oldType] = p
 
         await p.onAdded(this)
@@ -813,7 +813,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         }
         const type = p.constructor.PluginType
         if (!p.constructor.PluginType) {
-            this.console.error('ThreeViewer: PluginType is not defined for', p)
+            console.error('ThreeViewer: PluginType is not defined for', p)
             return p
         }
         for (const d of p.dependencies || []) {
@@ -821,17 +821,17 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         }
 
         if (this.plugins[type]) {
-            this.console.error(`ThreeViewer: Plugin of type ${type} already exists, removing and disposing old plugin. This might break functionality, ensure only one plugin of a type is added`, this.plugins[type], p)
+            console.error(`ThreeViewer: Plugin of type ${type} already exists, removing and disposing old plugin. This might break functionality, ensure only one plugin of a type is added`, this.plugins[type], p)
             this.removePluginSync(this.plugins[type])
         }
         try {
             this.plugins[type] = p
             const oldType = p.constructor.OldPluginType
-            if (oldType && this.plugins[oldType]) this.console.error(`ThreeViewer: Plugin type mismatch ${oldType}`)
+            if (oldType && this.plugins[oldType]) console.error(`ThreeViewer: Plugin type mismatch ${oldType}`)
             if (oldType) this.plugins[oldType] = p
             p.onAdded(this)
         } catch (e) {
-            this.console.error('ThreeViewer: Error adding plugin, check console for details', e)
+            console.error('ThreeViewer: Error adding plugin, check console for details', e)
             delete this.plugins[type]
         }
         this._onPluginAdd(p)
@@ -1038,7 +1038,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         return Object.entries(this.plugins).map(p=> {
             if (filter && !filter.includes(p[1].constructor.PluginType)) return
             if (this.serializePluginsIgnored.includes((p[1].constructor as any).PluginType)) return
-            // if (!p[1].toJSON) this.console.log(`Plugin of type ${p[0]} is not serializable`)
+            // if (!p[1].toJSON) console.log(`Plugin of type ${p[0]} is not serializable`)
             return p[1].serializeWithViewer !== false ? p[1].toJSON?.(meta) : undefined
         }).filter(p=> !!p)
     }
@@ -1052,13 +1052,13 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
     deserializePlugins(plugins: any[], meta?: SerializationMetaType): this {
         plugins.forEach(p=>{
             if (!p.type) {
-                this.console.warn('Invalid plugin to import ', p)
+                console.warn('Invalid plugin to import ', p)
                 return
             }
             if (this.serializePluginsIgnored.includes(p.type)) return
             const plugin = this.getPlugin(p.type)
             if (!plugin) {
-                // this.console.warn(`Plugin of type ${p.type} is not added, cannot deserialize`)
+                // console.warn(`Plugin of type ${p.type} is not added, cannot deserialize`)
                 return
             }
             plugin.fromJSON && plugin.fromJSON(p, meta)
@@ -1086,15 +1086,15 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
      * @param plugin
      */
     async importPluginConfig(json: ISerializedConfig, plugin?: IViewerPlugin) {
-        // this.console.log('importing plugin preset', json, plugin)
+        // console.log('importing plugin preset', json, plugin)
         const type = json.type
         plugin = plugin || this.getPlugin(type)
         if (!plugin) {
-            this.console.warn(`No plugin found for type ${type} to import config`)
+            console.warn(`No plugin found for type ${type} to import config`)
             return undefined
         }
         if (!plugin.fromJSON) {
-            this.console.warn(`Plugin ${type} does not support importing presets`)
+            console.warn(`Plugin ${type} does not support importing presets`)
             return undefined
         }
         const resources = json.resources || {}
@@ -1137,7 +1137,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
             if (this.getPlugin(json.type)) {
                 return this.importPluginConfig(json)
             } else {
-                this.console.error(`Unknown config type ${json.type} to import`)
+                console.error(`Unknown config type ${json.type} to import`)
                 return undefined
             }
         }
@@ -1157,7 +1157,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
             ...this._defaultConfig,
             plugins: this.serializePlugins(meta, pluginFilter),
         }, ThreeSerialization.Serialize(this, meta, true))
-        // this.console.log(dat)
+        // console.log(dat)
 
         if (!binary) convertArrayBufferToStringsInMeta(meta)
 
@@ -1178,17 +1178,17 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
 
         // region legacy
         if (data2.backgroundIntensity !== undefined && data2.scene?.backgroundIntensity === undefined) {
-            this.console.warn('old file format, backgroundIntensity moved to RootScene')
+            console.warn('old file format, backgroundIntensity moved to RootScene')
             this._scene.backgroundIntensity = data2.backgroundIntensity
             delete data2.backgroundIntensity
         }
         if (data2.useLegacyLights !== undefined && data2.renderManager?.useLegacyLights === undefined) {
-            this.console.warn('old file format, useLegacyLights moved to RenderManager')
+            console.warn('old file format, useLegacyLights moved to RenderManager')
             this.renderManager.useLegacyLights = data2.useLegacyLights
             delete data2.useLegacyLights
         }
         if (data2.background !== undefined && data2.scene?.background === undefined) {
-            this.console.warn('old file format, background moved to RootScene')
+            console.warn('old file format, background moved to RootScene')
             if (data2.background === 'envMapBackground') data2.background = 'environment'
             else if (typeof data2.background === 'number')
                 data2.background = new Color().setHex(data2.background, LinearSRGBColorSpace)
@@ -1218,7 +1218,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         }
 
         if (!meta?.__isLoadedResources) {
-            this.console.error('ThreeViewer: meta in fromJSON is not available or is not loaded resources, call viewer.loadConfigResources first, or directly use viewer.importConfig')
+            console.error('ThreeViewer: meta in fromJSON is not available or is not loaded resources, call viewer.loadConfigResources first, or directly use viewer.importConfig')
             return null
         }
 
@@ -1250,7 +1250,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
     }
 
     loadConfigResources = async(json: Partial<SerializationMetaType>, extraResources?: Partial<SerializationResourcesType>): Promise<any> => {
-        // this.console.log(json)
+        // console.log(json)
         if (json.__isLoadedResources) return json
         const meta = metaFromResources(json, this)
         return await MetaImporter.ImportMeta(meta, extraResources)
@@ -1290,7 +1290,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
     private _setActiveCameraView: EventListener2<'setView'|'activateMain', ISceneEventMap, RootScene> = (event) => {
         if (event.type === 'setView') {
             if (!event.camera) {
-                this.console.warn('Cannot find camera', event)
+                console.warn('Cannot find camera', event)
                 return
             }
             const camera = this._scene.mainCamera
@@ -1308,13 +1308,13 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
         if ((plugin as Class<IViewerPlugin>).prototype) {
             const p1 = this.getPlugin(plugin as Class<T>)
             if (p1) {
-                this.console.error(`Plugin of type ${p1.constructor.PluginType} already exists, no new plugin created`, p1)
+                console.error(`Plugin of type ${p1.constructor.PluginType} already exists, no new plugin created`, p1)
                 return p1
             }
             try {
                 p = new (plugin as Class<T>)(...args)
             } catch (e) {
-                this.console.error('ThreeViewer: Error creating plugin', e)
+                console.error('ThreeViewer: Error creating plugin', e)
                 return undefined
             }
         } else p = plugin as T
@@ -1363,7 +1363,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
     public async fitToView(selected?: Object3D, distanceMultiplier = 1.5, duration?: number, ease?: ((v: number) => number)|EasingFunctionType) {
         const camViews = this.getPlugin<CameraViewPlugin>('CameraViews')
         if (!camViews) {
-            this.console.error('ThreeViewer: CameraViewPlugin (CameraViews) is required for fitToView to work')
+            console.error('ThreeViewer: CameraViewPlugin (CameraViews) is required for fitToView to work')
             return
         }
         await camViews?.animateToFitObject(selected, distanceMultiplier, duration, ease, {min: ((<OrbitControls3> this.scene.mainCamera.controls)?.minDistance ?? 0.5) + 0.5, max: 1000.0})
@@ -1443,7 +1443,7 @@ export class ThreeViewer extends EventDispatcher<Record<IViewerEventTypes, IView
      * @deprecated - use {@link renderManager} instead
      */
     get renderer(): ViewerRenderManager {
-        this.console.error('ThreeViewer: renderer is deprecated, use renderManager instead')
+        console.error('ThreeViewer: renderer is deprecated, use renderManager instead')
         return this.renderManager
     }
 
